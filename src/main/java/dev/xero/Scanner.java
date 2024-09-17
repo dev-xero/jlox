@@ -43,6 +43,27 @@ class Scanner {
         return source.charAt(current);
     }
 
+    private char peekNext() {
+        if (current + 1 >= source.length())
+            return '\0';
+        return source.charAt(current + 1);
+    }
+
+    private boolean isDigit(char ch) {
+        return ch >= '0' && ch <= '9';
+    }
+
+    private void number() {
+        while (isDigit(peek())) advance();
+
+        if (peek() == '.' && isDigit(peekNext())) {
+            advance(); // consume the "."
+            while (isDigit(peek())) advance();
+        }
+
+        addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
+    }
+
     private void string() {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') line++;
@@ -96,7 +117,10 @@ class Scanner {
                 break; // Ignore whitespace
             case '"': string(); break;
             default:
-                Lox.error(line, "Unexpected character.");
+                if (isDigit(ch))
+                    number();
+                else
+                    Lox.error(line, "Unexpected character.");
                 break;
         }
     }
