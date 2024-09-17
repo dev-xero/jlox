@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class Lox {
+    static boolean hadError = false;
+
     // CORE
     private static void run(String source) {
         Scanner scanner = new Scanner(source);
@@ -16,6 +18,15 @@ public class Lox {
         for (Token token : tokens) {
             System.out.println(token);
         }
+    }
+
+    static void error(int line, String message) {
+        report(line, "", message);
+    }
+
+    private static void report(int line, String where, String message) {
+        System.err.println("[line " + line + "] Error" + where + ": " + message);
+        hadError = true;
     }
 
     private static void runFile(String path) throws IOException {
