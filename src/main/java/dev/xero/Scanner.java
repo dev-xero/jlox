@@ -44,6 +44,9 @@ class Scanner {
             case '+': addToken(PLUS); break;
             case ';': addToken(SEMICOLON); break;
             case '*': addToken(STAR); break;
+            default:
+                Lox.error(line, "Unexpected character.");
+                break;
         }
     }
 
@@ -53,8 +56,7 @@ class Scanner {
 
     List<Token> scanTokens() {
         while(!isAtEnd()) {
-            // We are at the beginning of the next lexeme
-            start = current;
+            start = current; // beginning of the next lexeme
             scanToken();
         }
 
