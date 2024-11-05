@@ -8,6 +8,7 @@ import java.util.Map;
 import static dev.xero.TokenType.*;
 
 class Scanner {
+
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
     private int start = 0;
@@ -17,6 +18,7 @@ class Scanner {
     private static final Map<String, TokenType> keywords;
 
     static {
+
         keywords = new HashMap<>();
         keywords.put("and", AND);
         keywords.put("class", CLASS);
@@ -34,58 +36,83 @@ class Scanner {
         keywords.put("true", TRUE);
         keywords.put("var", VAR);
         keywords.put("while", WHILE);
+
     }
 
     private boolean isAtEnd() {
+
         return current >= source.length();
+
     }
 
     private char advance() {
+
         return source.charAt(current++);
+
     }
 
     // Single character tokens, mostly
     private void addToken(TokenType type) {
+
         addToken(type, null);
+
     }
 
     // Overload, adds tokens that have values
     private void addToken(TokenType type, Object literal) {
+
         String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
+
     }
 
     private boolean match(char expected) {
+
         if (isAtEnd()) return false;
         if (source.charAt(current) != expected) return false;
         current++;
+
         return true;
+
     }
 
     private char peek() {
+
         if (isAtEnd()) return '\0';
+        
         return source.charAt(current);
+
     }
 
     private char peekNext() {
+
         if (current + 1 >= source.length())
             return '\0';
+
         return source.charAt(current + 1);
+
     }
 
     private boolean isDigit(char ch) {
+
         return ch >= '0' && ch <= '9';
+
     }
 
     private boolean isAlpha(char ch) {
+
         return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
+
     }
 
     private boolean isAlphaNumeric(char ch) {
+
         return isAlpha(ch) || isDigit(ch);
+
     }
 
     private void number() {
+
         while (isDigit(peek())) advance();
 
         if (peek() == '.' && isDigit(peekNext())) {
@@ -94,13 +121,17 @@ class Scanner {
         }
 
         addToken(NUMBER, Double.parseDouble(source.substring(start, current)));
+
     }
 
     private void string() {
+
         while (peek() != '"' && !isAtEnd()) {
+
             if (peek() == '\n') line++;
             advance();
         }
+
         if (isAtEnd()) {
             Lox.error(line, "Unterminated string literal.");
             return;
@@ -109,20 +140,27 @@ class Scanner {
         advance(); // The closing "
         String value = source.substring(start + 1, current - 1); // Skip quotes
         addToken(STRING, value);
+
     }
 
     private void identifier() {
+
         while (isAlphaNumeric(peek()))
             advance();
 
         String text = source.substring(start, current);
         TokenType type = keywords.get(text);
+        
         if (type == null) type = IDENTIFIER;
+        
         addToken(type);
+
     }
 
     private void scanToken() {
+
         char ch = advance();
+
         switch (ch) {
             case '(': addToken(LEFT_PAREN); break;
             case ')': addToken(RIGHT_PAREN); break;
@@ -161,25 +199,34 @@ class Scanner {
             default:
                 if (isDigit(ch))
                     number();
+
                 else if (isAlpha(ch))
                     identifier();
+
                 else
                     Lox.error(line, "Unexpected character.");
-                break;
+                
+                    break;
         }
+
     }
 
     Scanner(String source) {
+
         this.source = source;
+
     }
 
     List<Token> scanTokens() {
+
         while(!isAtEnd()) {
             start = current; // beginning of the next lexeme
             scanToken();
         }
 
         tokens.add(new Token(EOF, "", null, line));
+
         return tokens;
+
     }
 }
